@@ -2,21 +2,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
   	match /contacts/{contactId}/{documents=**} {
-    	allow read, update, delete: if get(/databases/$(database)/documents/shops/$(resource.data.shopId)/members/$(request.auth.uid)).data.role == "owner"
-      allow create: if get(/databases/$(database)/documents/shops/$(request.resource.data.shopId)/members/$(request.auth.uid)).data.role == "owner"
+        allow read, update, delete: if request.auth.token.roles[resource.data.shopId] == "owner"
+        allow create: if request.auth.token.roles[request.resource.data.shopId] == "owner"
     }
     match /shops/{shopId}/{documents=**} {
-    	allow read: if get(/databases/$(database)/documents/shops/$(shopId)/members/$(request.auth.uid)).data.role == "owner"
-      allow write: if false
+    	allow read: if request.auth.token.roles[shopId] == "owner"
+        allow write: if false
     }
     match /profiles/{userId}/{documents=**} {
     	allow read: if request.auth.uid == userId
-      allow write: if false
+        allow write: if false
     }
     match /shop_requests/{requestId}/{documents=**} {
-    	allow read: if get(/databases/$(database)/documents/shops/$(resource.data.shopId)/members/$(request.auth.uid)).data.role == "owner"
-      allow create: if get(/databases/$(database)/documents/shops/$(request.resource.data.shopId)/members/$(request.auth.uid)).data.role == "owner"
-      allow update, delete: if false
+    	allow read: if request.auth.token.roles[resource.data.shopId] == "owner"
+        allow create: if request.auth.token.roles[request.resource.data.shopId] == "owner"
+        allow update, delete: if false
     }
     match /notifications/{token}/{documents=**} {
         allow get: if true
@@ -24,6 +24,10 @@ service cloud.firestore {
     	allow write: if false
     }
     match /notification_debug/{token}/{document=**} {
+        allow read: if false
+        allow write: if false
+    }
+    match /shop_members/{docId}/{document=**} {
         allow read: if false
         allow write: if false
     }

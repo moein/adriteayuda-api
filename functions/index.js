@@ -3,5 +3,6 @@ admin.initializeApp();
 
 module.exports = {
     notifyNewShopRequest: require('./src/listeners/notify-new-shop-request'),
-    notifyContactAdded: require('./src/listeners/notify-contact-added')
+    notifyContactAdded: require('./src/listeners/notify-contact-added'),
+    updateCustomClaims: require('./src/listeners/update-custom-claims')
 };
