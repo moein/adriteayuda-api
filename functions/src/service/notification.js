@@ -19,8 +19,6 @@ async function sendSms(message, recipient) {
                 { msisdn: recipient },
             ],
         };
-
-
         const encodedAuth = Buffer.from(`${apiToken}:`).toString("base64");
 
         const resp = await fetch("https://gatewayapi.com/rest/mtsms", {
@@ -43,15 +41,31 @@ async function sendSms(message, recipient) {
     await sendSMS();
 }
 
-async function notifyBySms (phone, message, debug) {
+async function createNotification (phone, message, debug) {
     message.timestamp = firebase.firestoreNow;
     debug.timestamp = firebase.firestoreNow;
     const token = crypto.randomBytes(48).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');;
     await firebase.firestore.collection('notifications').doc(token).set(message);
     await firebase.firestore.collection('notification_debug').doc(token).set({phone, message, debug})
-    await sendSms(`Tienes un mesnsaje nuevo de AdriTeAyuda: https://${config.server.domain}/m?t=${token}`, phone);
+
+    return token
+}
+
+function createNotificationLink(token) {
+    return `https://${config.server.domain}/m?t=${token}`;
+}
+
+async function notifyBySms (phone, notification, debug) {
+    const token = await createNotification(phone, notification, debug)
+    await sendSms(`Tienes un mesnsaje nuevo de AdriTeAyuda: ${createNotificationLink(token)}`, phone);
+}
+
+async function notifyBySmsWithCustomText (phone, notification, smsText, debug) {
+    const token = await createNotification(phone, notification, debug)
+    await sendSms(smsText.replace('%LINK%', createNotificationLink(token)), phone);
 }
 
 module.exports = {
-    notifyBySms
+    notifyBySms,
+    notifyBySmsWithCustomText
 }

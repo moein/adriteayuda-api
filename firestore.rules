@@ -1,12 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+      function isUpdateToFields(fields) {
+          return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+      }
+      function isShopOwner(shopId) {
+        return request.auth.token.roles[shopId] == "owner";
+      }
   	match /contacts/{contactId}/{documents=**} {
-        allow read, update, delete: if request.auth.token.roles[resource.data.shopId] == "owner"
-        allow create: if request.auth.token.roles[request.resource.data.shopId] == "owner"
+        allow read, update, delete: if isShopOwner(resource.data.shopId);
+        allow create: if isShopOwner(request.resource.data.shopId);
     }
     match /shops/{shopId}/{documents=**} {
-    	allow read: if request.auth.token.roles[shopId] == "owner"
+    	allow read: if isShopOwner(shopId);
         allow write: if false
     }
     match /profiles/{userId}/{documents=**} {
@@ -14,14 +20,15 @@ service cloud.firestore {
         allow write: if false
     }
     match /shop_requests/{requestId}/{documents=**} {
-    	allow read: if request.auth.token.roles[resource.data.shopId] == "owner"
-        allow create: if request.auth.token.roles[request.resource.data.shopId] == "owner"
-        allow update, delete: if false
+    	allow read, delete: if isShopOwner(resource.data.shopId);
+        allow create: if isShopOwner(request.resource.data.shopId)
+        allow update: if false
     }
     match /notifications/{token}/{documents=**} {
         allow get: if true
         allow list: if false
-    	allow write: if false
+    	allow create, delete: if false
+    	allow update: if isUpdateToFields(['viewTimestamp']);
     }
     match /notification_debug/{token}/{document=**} {
         allow read: if false

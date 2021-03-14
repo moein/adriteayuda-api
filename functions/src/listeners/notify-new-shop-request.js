@@ -1,5 +1,5 @@
 const firebase = require('../service/firebase');
-const notification = require('../service/notification');
+const notificationService = require('../service/notification');
 
 module.exports = firebase.firestoreListener
     .document("shop_requests/{requestId}")
@@ -29,6 +29,6 @@ module.exports = firebase.firestoreListener
                 console.log(`Got "${request.type}" which is not supported by this function`)
                 return
         }
-        const message = {type: request.type, payload};
-        await notification.notifyBySms(contactData.phone, message);
+        const notification = {type: request.type, payload};
+        await notificationService.notifyBySms(contactData.phone, notification, {trigger: `shop_requests/${context.params.requestId}:onCreate`, request});
     });

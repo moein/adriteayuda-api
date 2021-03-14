@@ -1,5 +1,5 @@
 const firebase = require('../service/firebase');
-const notification = require('../service/notification');
+const notificationService = require('../service/notification');
 
 module.exports = firebase.firestoreListener
     .document("contacts/{contactId}")
@@ -16,6 +16,13 @@ module.exports = firebase.firestoreListener
             creatorPhone: shopData.phone,
             contactName: contact.name
         }
-        const message = {type: 'added_as_contact', payload};
-        await notification.notifyBySms(contact.phone, message, {trigger: `contacts/${context.params.contactId}:onCreate`, ...contact});
+        const notification = {type: 'added_as_contact', payload};
+        const text = `Hola ${contact.name}! ${userData.name} de la tienda ${shopData.name} te ha agregado como contacto en la aplicacion AdriTeAyuda. Para mas info: %LINK%`;
+
+        await notificationService.notifyBySmsWithCustomText(
+            contact.phone,
+            notification,
+            text,
+            {trigger: `contacts/${context.params.contactId}:onCreate`, contact}
+        );
     });
