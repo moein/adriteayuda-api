@@ -2,6 +2,26 @@ const crypto = require('crypto');
 const config = require('../../config');
 const firebase = require('../service/firebase');
 
+/**
+ * @param {Object} message
+ * @param {string} message.subject
+ * @param {string} message.html
+ * @param {string} message.text
+ * @param {string} recipient
+ * @param addFooterHelp
+ * @returns {Promise<void>}
+ */
+async function sendMail(message, recipient, addFooterHelp = false) {
+    if (addFooterHelp) {
+        message.html += '<br><br>Si tienes alguna duda me puedes contactar enviándome un whatsapp a <a href="https://wa.me/34‭679196286">‭679 196 286</a>'
+        message.text += '\nSi tienes alguna duda me puedes contactar enviándome un whatsapp a ‭679 196 286';
+    }
+    await firebase.firestore.collection('mails').add({
+        to: recipient,
+        message,
+    })
+}
+
 async function sendSms(message, recipient) {
     const apiToken = config.sms.apiToken;
     if (!apiToken) {
@@ -44,7 +64,7 @@ async function sendSms(message, recipient) {
 async function createNotification (phone, message, debug) {
     message.timestamp = firebase.firestoreNow;
     debug.timestamp = firebase.firestoreNow;
-    const token = crypto.randomBytes(48).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');;
+    const token = crypto.randomBytes(48).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/\=/g, '');
     await firebase.firestore.collection('notifications').doc(token).set(message);
     await firebase.firestore.collection('notification_debug').doc(token).set({phone, message, debug})
 
@@ -67,5 +87,6 @@ async function notifyBySmsWithCustomText (phone, notification, smsText, debug) {
 
 module.exports = {
     notifyBySms,
-    notifyBySmsWithCustomText
+    notifyBySmsWithCustomText,
+    sendMail,
 }
