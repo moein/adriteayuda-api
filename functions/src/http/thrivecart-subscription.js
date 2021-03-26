@@ -62,23 +62,17 @@ async function addSubscriptionPeriod(payload, eventId, accountId) {
 }
 
 async function handleRebillFailed(payload) {
-    const template = `¡Hola ${payload.customer.name}!
+    const html = `¡Hola ${payload.customer.name}!
 <br><br>
 Hemos intentado cobrarte tu subscripcioón de AdriTeAyuda pero no lo hemos conseguido.
 <br><br>
-No te preocupes, todavía tienes la cuenta activada. Vete a %link% y actualiza tus datos del pago antes que se desactive tu cuenta.
+No te preocupes, todavía tienes la cuenta activada. Vete a <a href="https://payment.genyus.tech/updateinfo/">este enlace</a> y actualiza tus datos del pago antes que se desactive tu cuenta.
 <br><br>
 ¡Muchas gracias! 
 `;
-    const html = template
-        .replace(/%link%/g, `<a href="https://payment.genyus.tech/updateinfo/">este enlace</a>`)
-    const text = template
-        .replace(/%link%/g, 'https://payment.genyus.tech/updateinfo/')
-        .replace(/<br><br>/g, '')
     const message = {
         subject: 'No hemos conseguido cobrar tu subscripción',
-        html,
-        text
+        html
     }
     await notification.sendMail(message, payload.customer.email, true)
     await notifyMoein(JSON.stringify(payload), 'Rebill failed');
@@ -89,7 +83,7 @@ async function handleSubscriptionCancelled(payload) {
 }
 
 async function notifyMoein(subject, html) {
-    await notification.sendMail({html, text: html, subject}, 'support@genyus.tech');
+    await notification.sendMail({html, subject}, 'support@genyus.tech');
 }
 
 module.exports = thrivecart.webhook(async (req) => {

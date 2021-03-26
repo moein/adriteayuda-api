@@ -9,6 +9,7 @@ module.exports = {
     cleanupContactData: require('./src/listeners/cleanup-contact-data'),
     updateAccountUsers: require('./src/listeners/update-account-users'),
     // http
+    remindRenewal: require('./src/http/remind-renewal'),
     inviteUser: require('./src/http/invite-user'),
     thrivecartSubscription: require('./src/http/thrivecart-subscription'),
     checkSubscription: require('./src/http/check-subscription'),
