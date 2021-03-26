@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const config = require('../../config');
 const firebase = require('../service/firebase');
-const stripHtml = require('string-strip-html').stripHtml;
 
 /**
  * @param {Object} message
@@ -13,7 +12,7 @@ const stripHtml = require('string-strip-html').stripHtml;
  */
 async function sendMail(message, recipient, addFooterHelp = false) {
     if (addFooterHelp) {
-        message.html += '<br><br>Si tienes alguna duda me puedes contactar enviándome un whatsapp a <a href="https://wa.me/34‭679196286">‭679 196 286</a>'
+        message.html += '<br><br>Si tienes alguna duda me puedes contactar enviándome un whatsapp a ‭679 196 286'
     }
     Object.assign(message, {text: message.html});
 
